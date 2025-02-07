@@ -1,5 +1,6 @@
 package com.leonardo.DSCatalog.services;
 
+import com.leonardo.DSCatalog.DTO.CategoryDTO;
 import com.leonardo.DSCatalog.entities.Category;
 import com.leonardo.DSCatalog.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +16,8 @@ public class CategoryService {
     private CategoryRepository repository;
 
     @Transactional(readOnly = true)
-    public List<Category> findAll(){
-        List<Category> result = repository.findAll();
+    public List<CategoryDTO> findAll(){
+        List<CategoryDTO> result = repository.findAll().stream().map(CategoryDTO::new).toList();
         return result;
     }
 
