@@ -1,6 +1,8 @@
 package com.leonardo.DSCatalog.resources;
 
 import com.leonardo.DSCatalog.entities.Category;
+import com.leonardo.DSCatalog.services.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,12 +15,12 @@ import java.util.List;
 @RequestMapping(value = "/categories")
 public class CategoryResource {
 
+    @Autowired
+    private CategoryService service;
 
     @GetMapping
     public ResponseEntity<List<Category>> findAll(){
-       List<Category> result = new ArrayList<>();
-       result.add(new Category(01L, "Books"));
-       result.add(new Category(02L, "Eletronics"));
+       List<Category> result = service.findAll();
        return ResponseEntity.ok(result);
     }
 
