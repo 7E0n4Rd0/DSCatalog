@@ -5,7 +5,8 @@ import com.leonardo.DSCatalog.entities.Product;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public class ProductDTO implements Serializable {
@@ -17,7 +18,7 @@ public class ProductDTO implements Serializable {
     private String imgUrl;
     private Instant moment;
 
-    private Set<CategoryDTO> categories = new HashSet<>();
+    private List<CategoryDTO> categories = new ArrayList<>();
 
     public ProductDTO(Long id, String name, String description, Double price, String imgUrl, Instant moment) {
         this.id = id;
@@ -35,11 +36,7 @@ public class ProductDTO implements Serializable {
         price = entity.getPrice();
         imgUrl = entity.getImgUrl();
         moment = entity.getMoment();
-    }
-
-    public ProductDTO(Product entity, Set<Category> categories){
-        this(entity);
-        categories.forEach(cat -> this.categories.add(new CategoryDTO(cat)));
+        categories = entity.getCategories().stream().map(CategoryDTO::new).toList();
     }
 
     public Long getId() {
@@ -66,7 +63,7 @@ public class ProductDTO implements Serializable {
         return moment;
     }
 
-    public Set<CategoryDTO> getCategories() {
+    public List<CategoryDTO> getCategories() {
         return categories;
     }
 }
