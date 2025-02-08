@@ -1,5 +1,6 @@
 package com.leonardo.DSCatalog.resources.exceptions;
 
+import com.leonardo.DSCatalog.services.exceptions.DatabaseException;
 import com.leonardo.DSCatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,13 @@ public class ResourceExceptionHandler {
         StandardError err = new StandardError(Instant.now(), HttpStatus.NOT_FOUND.value(),
                 "Resource not Found", e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+    }
+
+    @ExceptionHandler(DatabaseException.class)
+    public ResponseEntity<StandardError> integrityViolation(DatabaseException e, HttpServletRequest request){
+        StandardError err = new StandardError(Instant.now(), HttpStatus.BAD_REQUEST.value(),
+                "Fail on Referential Integrity", e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
 }
