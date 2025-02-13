@@ -9,13 +9,11 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,6 +39,7 @@ public class CategoryService {
     public CategoryDTO insert(CategoryDTO dto){
         Category entity = new Category();
 
+        entity.setId(dto.getId());
         entity.setName(dto.getName());
 
         repository.save(entity);
@@ -51,6 +50,7 @@ public class CategoryService {
     public CategoryDTO update(Long id, CategoryDTO dto){
         try {
             Category entity = repository.getReferenceById(id);
+            entity.setId(dto.getId());
             entity.setName(dto.getName());
             repository.save(entity);
             return new CategoryDTO(entity);
