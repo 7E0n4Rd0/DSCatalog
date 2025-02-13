@@ -73,7 +73,6 @@ public class ProductServicesTests {
 
         Mockito.when(categoryRepository.getReferenceById(existingId)).thenReturn(category);
         Mockito.when(categoryRepository.getReferenceById(nonExistingId)).thenThrow(EntityNotFoundException.class);
-        Mockito.doReturn(category).when(categoryRepository).getReferenceById(ArgumentMatchers.any());
     }
 
     @Test
