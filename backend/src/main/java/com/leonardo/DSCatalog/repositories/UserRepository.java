@@ -18,6 +18,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "tb_role.id AS roleId, tb_role.authority FROM TB_USER " +
                 "INNER JOIN TB_USER_ROLE ON tb_user_role.user_id = tb_user.id " +
                 "INNER JOIN TB_ROLE ON tb_user_role.role_id = tb_role.id ")
-    List<UserProjection> findAllUserWithRoles(Pageable pageable);
+    List<UserProjection> findAllUserWithRoles();
 
 }

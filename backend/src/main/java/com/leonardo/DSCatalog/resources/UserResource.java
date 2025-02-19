@@ -5,6 +5,8 @@ import com.leonardo.DSCatalog.DTO.UserInsertDTO;
 import com.leonardo.DSCatalog.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Set;
 
 @Controller
 @RequestMapping(value = "/users")
@@ -22,7 +25,10 @@ public class UserResource {
 
     @GetMapping
     public ResponseEntity<Page<UserDTO>> findAll(Pageable pageable){
-        return ResponseEntity.ok().body(service.findAllWithRoles(pageable));
+        Page<UserDTO> userDTOPage = service.findAllWithRoles(pageable);
+        Page<UserDTO> pages = new PageImpl<UserDTO>(userDTOPage.getContent(), pageable,
+                userDTOPage.getTotalElements());
+        return ResponseEntity.ok().body(pages);
     }
 
     @GetMapping(value = "/{id}")
@@ -32,7 +38,7 @@ public class UserResource {
 
     @PostMapping
     public ResponseEntity<UserDTO> insert(@RequestBody UserInsertDTO insertDTO){
-        UserDTO  dto = service.insert(insertDTO);
+        UserDTO dto = service.insert(insertDTO);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(dto.getId()).toUri();
         return ResponseEntity.created(uri).body(dto);

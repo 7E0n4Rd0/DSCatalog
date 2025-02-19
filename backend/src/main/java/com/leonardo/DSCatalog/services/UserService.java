@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,9 +34,12 @@ public class UserService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
     @Transactional(readOnly = true)
     public Page<UserDTO> findAllWithRoles(Pageable pageable){
-        List<UserProjection> list = repository.findAllUserWithRoles(pageable);
+        List<UserProjection> list = repository.findAllUserWithRoles();
         Set<User> users = new HashSet<>();
         User entity = null;
         for (UserProjection projection : list){
@@ -49,7 +54,8 @@ public class UserService {
             }
             users.add(entity);
         }
-        Page<UserDTO> page = new PageImpl<>(users.stream().map(UserDTO::new).toList());
+        Page<UserDTO> page = new PageImpl<UserDTO>(users.stream().map(UserDTO::new).toList(), pageable,
+                users.stream().map(UserDTO::new).toList().size());
         return page;
     }
 
@@ -64,7 +70,7 @@ public class UserService {
     public UserDTO insert(UserInsertDTO dto){
         User entity = new User();
         copyDtoToEntity(dto, entity);
-        entity.setPassword(dto.getPassword());
+        entity.setPassword(passwordEncoder.encode(dto.getPassword()));
         entity = repository.save(entity);
         return new UserDTO(entity);
     }
@@ -97,14 +103,13 @@ public class UserService {
         entity.setFirstName(dto.getFirstName());
         entity.setLastName(dto.getLastName());
         entity.setEmail(dto.getEmail());
-        //entity.setPassword();
         entity.getRoles().clear();
 
         entity.getRoles()
                 .addAll(dto.getRoles().stream()
                         .map(x -> new Role(
-                                roleRepository.findByAuthority(x.getAuthority()).getId(),
-                                roleRepository.findByAuthority(x.getAuthority()).getAuthority()))
+                                roleRepository.findById(x.getId()).get().getId(),
+                                roleRepository.findById(x.getId()).get().getAuthority()))
                         .collect(Collectors.toSet()));
     }
 
