@@ -2,6 +2,7 @@ package com.leonardo.DSCatalog.services;
 
 import com.leonardo.DSCatalog.DTO.UserDTO;
 import com.leonardo.DSCatalog.DTO.UserInsertDTO;
+import com.leonardo.DSCatalog.DTO.UserUpdateDTO;
 import com.leonardo.DSCatalog.entities.Role;
 import com.leonardo.DSCatalog.entities.User;
 import com.leonardo.DSCatalog.projections.UserProjection;
@@ -64,7 +65,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO update(Long id, UserDTO dto) {
+    public UserDTO update(Long id, UserUpdateDTO dto) {
         try {
             User entity = repository.getReferenceById(id);
             copyDtoToEntity(dto, entity);

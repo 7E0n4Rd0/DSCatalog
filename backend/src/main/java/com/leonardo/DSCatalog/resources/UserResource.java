@@ -2,6 +2,7 @@ package com.leonardo.DSCatalog.resources;
 
 import com.leonardo.DSCatalog.DTO.UserDTO;
 import com.leonardo.DSCatalog.DTO.UserInsertDTO;
+import com.leonardo.DSCatalog.DTO.UserUpdateDTO;
 import com.leonardo.DSCatalog.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +42,9 @@ public class UserResource {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserDTO dto){
-        dto = service.update(id, dto);
-        return ResponseEntity.ok().body(dto);
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @Valid @RequestBody UserUpdateDTO dto){
+        UserDTO userDTO = service.update(id, dto);
+        return ResponseEntity.ok().body(userDTO);
     }
 
     @DeleteMapping(value = "/{id}")
