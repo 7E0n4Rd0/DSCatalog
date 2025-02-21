@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class ProductDTO implements Serializable {
 
