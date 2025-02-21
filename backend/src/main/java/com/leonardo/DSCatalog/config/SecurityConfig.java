@@ -15,6 +15,15 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
+    @Profile("test")
+    @Order(1)
+    public SecurityFilterChain h2SecurityFilterChain(HttpSecurity http) throws Exception {
+        http.securityMatcher(PathRequest.toH2Console()).csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()));
+        return http.build();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
         http.csrf(AbstractHttpConfigurer::disable);
         http.authorizeHttpRequests(auth ->

@@ -1,6 +1,5 @@
 package com.leonardo.DSCatalog.services;
 
-import com.leonardo.DSCatalog.DTO.RoleDTO;
 import com.leonardo.DSCatalog.DTO.UserDTO;
 import com.leonardo.DSCatalog.DTO.UserInsertDTO;
 import com.leonardo.DSCatalog.entities.Role;
@@ -12,18 +11,16 @@ import com.leonardo.DSCatalog.services.exceptions.DatabaseException;
 import com.leonardo.DSCatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.support.MutableSortDefinition;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 @Service
 public class UserService {
@@ -38,36 +35,27 @@ public class UserService {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public Page<UserDTO> findAllWithRoles(Pageable pageable){
-        List<UserProjection> list = repository.findAllUserWithRoles();
-        Set<User> users = new HashSet<>();
-        User entity = null;
-        for (UserProjection projection : list){
-            entity = new User();
-            copyProjectionToEntity(projection, entity);
-            if(!users.isEmpty()){
-                if(users.contains(entity)) {
-                    int index = users.stream().toList().indexOf(entity);
-                    users.stream().toList().get(index)
-                            .addRoles(new Role(projection.getRoleId(), projection.getAuthority()));
-                }
-            }
-            users.add(entity);
-        }
-        Page<UserDTO> page = new PageImpl<UserDTO>(users.stream().map(UserDTO::new).toList(), pageable,
-                users.stream().map(UserDTO::new).toList().size());
+    public Page<UserDTO> findAllWithRolesJPQL(Pageable pageable) {
+        Page<User> listUser = repository.findAllUserWithRolesPagedJPQL(pageable);
+        Page<UserDTO> page = new PageImpl<UserDTO>(listUser.stream().map(UserDTO::new).toList(), pageable, listUser.getSize());
         return page;
     }
 
+    /*@Transactional(readOnly = true)
+    public Page<UserDTO> findAllWithRolesSQL(Integer page, Integer size, String sort, String direction, Pageable pageable) {
+        Page<UserDTO> pageDto = listUserProjectionToPageUser(page, size, sort, direction, pageable);
+        return pageDto;
+    }*/
+
     @Transactional(readOnly = true)
-    public UserDTO findById(Long id){
+    public UserDTO findById(Long id) {
         Optional<User> obj = repository.findById(id);
         User entity = obj.orElseThrow(() -> new ResourceNotFoundException("Resource not found"));
         return new UserDTO(entity);
     }
 
     @Transactional
-    public UserDTO insert(UserInsertDTO dto){
+    public UserDTO insert(UserInsertDTO dto) {
         User entity = new User();
         copyDtoToEntity(dto, entity);
         entity.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -76,30 +64,30 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO update(Long id, UserDTO dto){
-        try{
+    public UserDTO update(Long id, UserDTO dto) {
+        try {
             User entity = repository.getReferenceById(id);
             copyDtoToEntity(dto, entity);
             entity = repository.save(entity);
             return new UserDTO(entity);
-        }catch (EntityNotFoundException e){
+        } catch (EntityNotFoundException e) {
             throw new ResourceNotFoundException("Resource not found");
         }
     }
 
     @Transactional
-    public void delete(Long id){
-        if(!repository.existsById(id)){
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Resource not found");
         }
-        try{
+        try {
             repository.deleteById(id);
-        }catch (DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             throw new DatabaseException("Integrity Violation");
         }
     }
 
-    private void copyDtoToEntity(UserDTO dto, User entity){
+    private void copyDtoToEntity(UserDTO dto, User entity) {
         entity.setFirstName(dto.getFirstName());
         entity.setLastName(dto.getLastName());
         entity.setEmail(dto.getEmail());
@@ -113,7 +101,7 @@ public class UserService {
                         .collect(Collectors.toSet()));
     }
 
-    private void copyProjectionToEntity(UserProjection projection, User entity){
+    private void copyProjectionToEntity(UserProjection projection, User entity) {
         entity.setId(projection.getId());
         entity.setFirstName(projection.getFirstName());
         entity.setLastName(projection.getLastName());
@@ -122,4 +110,53 @@ public class UserService {
         entity.addRoles(new Role(projection.getRoleId(), projection.getAuthority()));
     }
 
+    /*private Page<UserDTO> listUserProjectionToPageUser(Integer page, Integer size, String sort, String direction, Pageable pageable) {
+        List<UserProjection> result = repository.findAllUsersWithRolesPagedSQL(pageable);
+        Set<User> users = new HashSet<>();
+        User entity = null;
+        for (UserProjection projection : result) {
+            entity = new User();
+            copyProjectionToEntity(projection, entity);
+            if (!users.isEmpty()) {
+                if (users.contains(entity)) {
+                    int index = users.stream().toList().indexOf(entity);
+                    users.stream().toList().get(index)
+                            .addRoles(new Role(projection.getRoleId(), projection.getAuthority()));
+                }
+            }
+            users.add(entity);
+        }
+        System.out.println("Sort: "+ Sort.by(sort));
+        List<UserDTO> list = users.stream().sorted(getComparatorByName(Sort.by(sort))).map(UserDTO::new).toList();
+        //int start = Math.min((int) pageable.getOffset(), list.size());
+        //int end = Math.min((start + pageable.getPageSize()), list.size());
+        System.out.println(pageable.getPageNumber() +" "+ pageable.getPageSize() + " " + pageable.getSort().toString());
+        configurePage(sort, direction, list);
+        Page<UserDTO> userDTOPage = new PageImpl<UserDTO>(list);
+        return userDTOPage;
+    }
+
+    private void configurePage(String sort, String direction, List<UserDTO> list) {
+        MutableSortDefinition mutableSortDefinition = new MutableSortDefinition();
+        mutableSortDefinition.setProperty(sort);
+        PagedListHolder<UserDTO> pagedListHolder = new PagedListHolder<>(list);
+        pagedListHolder.setSort(mutableSortDefinition);
+        mutableSortDefinition.setAscending(false);
+    }
+
+    private Comparator<User> getComparatorByName(Sort sort) {
+        Comparator<User> firstName = Comparator.comparing(User::getFirstName);
+        Comparator<User> lastName = Comparator.comparing(User::getLastName);
+        Comparator<User> email = Comparator.comparing(User::getEmail);
+        Comparator<User> id = Comparator.comparing(User::getId);
+
+        List<Comparator<User>> comparatorList = new ArrayList<>(
+                List.of(firstName, lastName, email, id));
+        for (Comparator<User> comparator : comparatorList) {
+            if (comparator.toString().equals(sort.toString())) {
+                return comparator;
+            }
+        }
+        return firstName;
+    }*/
 }
