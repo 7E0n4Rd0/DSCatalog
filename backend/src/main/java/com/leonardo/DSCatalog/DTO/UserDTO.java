@@ -1,6 +1,8 @@
 package com.leonardo.DSCatalog.DTO;
 
 import com.leonardo.DSCatalog.entities.User;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -10,8 +12,10 @@ import java.util.stream.Collectors;
 public class UserDTO implements Serializable {
 
     private Long id;
+    @NotBlank(message = "required field")
     private String firstName;
     private String lastName;
+    @Email(message = "Enter a valid Email")
     private String email;
 
     private Set<RoleDTO> roles = new HashSet<>();

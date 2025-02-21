@@ -2,6 +2,10 @@ package com.leonardo.DSCatalog.DTO;
 
 import com.leonardo.DSCatalog.entities.Category;
 import com.leonardo.DSCatalog.entities.Product;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -12,10 +16,14 @@ import java.util.Set;
 public class ProductDTO implements Serializable {
 
     private Long id;
+    @Size(min = 5, max = 60, message = "Must be between in five or sixty characters")
+    @NotBlank(message = "required field")
     private String name;
     private String description;
+    @Positive(message = "Price must be positive")
     private Double price;
     private String imgUrl;
+    @PastOrPresent(message = "Product date cannot be in the future")
     private Instant moment;
 
     private List<CategoryDTO> categories = new ArrayList<>();
