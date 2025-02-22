@@ -3,6 +3,7 @@ package com.leonardo.DSCatalog.services;
 import com.leonardo.DSCatalog.DTO.UserDTO;
 import com.leonardo.DSCatalog.DTO.UserInsertDTO;
 import com.leonardo.DSCatalog.DTO.UserUpdateDTO;
+import com.leonardo.DSCatalog.config.AuthorizationServerConfig;
 import com.leonardo.DSCatalog.entities.Role;
 import com.leonardo.DSCatalog.entities.User;
 import com.leonardo.DSCatalog.projections.UserDetailsProjection;
@@ -21,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +38,8 @@ public class UserService implements UserDetailsService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public Page<UserDTO> findAllWithRolesJPQL(Pageable pageable) {
@@ -61,7 +65,7 @@ public class UserService implements UserDetailsService {
     public UserDTO insert(UserInsertDTO dto) {
         User entity = new User();
         copyDtoToEntity(dto, entity);
-        entity.setPassword(dto.getPassword());
+        entity.setPassword(passwordEncoder.encode(dto.getPassword()));
         entity = repository.save(entity);
         return new UserDTO(entity);
     }
