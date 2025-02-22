@@ -36,8 +36,6 @@ public class UserService implements UserDetailsService {
     @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
     public Page<UserDTO> findAllWithRolesJPQL(Pageable pageable) {
@@ -63,7 +61,7 @@ public class UserService implements UserDetailsService {
     public UserDTO insert(UserInsertDTO dto) {
         User entity = new User();
         copyDtoToEntity(dto, entity);
-        entity.setPassword(passwordEncoder.encode(dto.getPassword()));
+        entity.setPassword(dto.getPassword());
         entity = repository.save(entity);
         return new UserDTO(entity);
     }
