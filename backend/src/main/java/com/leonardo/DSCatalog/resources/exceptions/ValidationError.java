@@ -9,11 +9,7 @@ public class ValidationError extends StandardError{
     private List<FieldMessage> erros = new ArrayList<>();
 
     public ValidationError(Instant timestamp, Integer status, String error, String message, String path) {
-        this.setTimestamp(timestamp);
-        this.setStatus(status);
-        this.setError(error);
-        this.setMessage(message);
-        this.setPath(path);
+        super(timestamp, status, error, message, path);
     }
 
     public List<FieldMessage> getErros() {

@@ -5,6 +5,7 @@ import com.leonardo.DSCatalog.DTO.UserInsertDTO;
 import com.leonardo.DSCatalog.DTO.UserUpdateDTO;
 import com.leonardo.DSCatalog.entities.Role;
 import com.leonardo.DSCatalog.entities.User;
+import com.leonardo.DSCatalog.projections.UserDetailsProjection;
 import com.leonardo.DSCatalog.projections.UserProjection;
 import com.leonardo.DSCatalog.repositories.RoleRepository;
 import com.leonardo.DSCatalog.repositories.UserRepository;
@@ -16,6 +17,9 @@ import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository repository;
@@ -88,6 +92,25 @@ public class UserService {
         }
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        List<UserDetailsProjection> result = repository.searchUserAndRolesByEmail(username);
+
+        if (result.isEmpty()){
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        User user = new User();
+
+        user.setEmail(username);
+        user.setPassword(result.get(0).getPassword());
+        for (UserDetailsProjection projection : result){
+            user.addRoles(new Role(projection.getRoleId(), projection.getAuthority()));
+        }
+        return user;
+    }
+
     private void copyDtoToEntity(UserDTO dto, User entity) {
         entity.setFirstName(dto.getFirstName());
         entity.setLastName(dto.getLastName());
@@ -110,6 +133,7 @@ public class UserService {
 
         entity.addRoles(new Role(projection.getRoleId(), projection.getAuthority()));
     }
+
 
     /*private Page<UserDTO> listUserProjectionToPageUser(Integer page, Integer size, String sort, String direction, Pageable pageable) {
         List<UserProjection> result = repository.findAllUsersWithRolesPagedSQL(pageable);
