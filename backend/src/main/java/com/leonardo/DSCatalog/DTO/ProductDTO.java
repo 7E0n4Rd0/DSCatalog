@@ -1,6 +1,5 @@
 package com.leonardo.DSCatalog.DTO;
 
-import com.leonardo.DSCatalog.entities.Category;
 import com.leonardo.DSCatalog.entities.Product;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
