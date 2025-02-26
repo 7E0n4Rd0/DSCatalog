@@ -1,6 +1,7 @@
 package com.leonardo.DSCatalog.resources;
 
 import com.leonardo.DSCatalog.DTO.ProductDTO;
+import com.leonardo.DSCatalog.projections.ProductProjection;
 import com.leonardo.DSCatalog.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +24,8 @@ public class ProductResource {
     private ProductService service;
 
     @GetMapping
-    public ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable){
-        Page<ProductDTO> result = service.findAllPaged(pageable);
+    public ResponseEntity<Page<ProductProjection>> findAll(Pageable pageable){
+        Page<ProductProjection> result = service.testQuery(pageable);
         return ResponseEntity.ok(result);
     }
 

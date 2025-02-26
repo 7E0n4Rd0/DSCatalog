@@ -4,6 +4,7 @@ import com.leonardo.DSCatalog.DTO.CategoryDTO;
 import com.leonardo.DSCatalog.DTO.ProductDTO;
 import com.leonardo.DSCatalog.entities.Category;
 import com.leonardo.DSCatalog.entities.Product;
+import com.leonardo.DSCatalog.projections.ProductProjection;
 import com.leonardo.DSCatalog.repositories.CategoryRepository;
 import com.leonardo.DSCatalog.repositories.ProductRepository;
 import com.leonardo.DSCatalog.services.exceptions.DatabaseException;
@@ -17,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -86,5 +89,10 @@ public class ProductService {
             Category category = categoryRepository.getReferenceById(catDto.getId());
             entity.getCategories().add(category);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductProjection> testQuery(Pageable pageable) {
+        return repository.searchProducts(Arrays.asList(1L, 3L), "ma", pageable);
     }
 }
