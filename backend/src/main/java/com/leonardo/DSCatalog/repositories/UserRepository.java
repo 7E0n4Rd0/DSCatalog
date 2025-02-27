@@ -1,6 +1,5 @@
 package com.leonardo.DSCatalog.repositories;
 
-import com.leonardo.DSCatalog.DTO.UserDTO;
 import com.leonardo.DSCatalog.entities.User;
 import com.leonardo.DSCatalog.projections.UserDetailsProjection;
 import com.leonardo.DSCatalog.projections.UserProjection;

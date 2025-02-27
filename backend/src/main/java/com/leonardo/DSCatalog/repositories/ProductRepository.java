@@ -1,7 +1,5 @@
 package com.leonardo.DSCatalog.repositories;
 
-import com.leonardo.DSCatalog.DTO.CategoryDTO;
-import com.leonardo.DSCatalog.DTO.ProductDTO;
 import com.leonardo.DSCatalog.entities.Product;
 import com.leonardo.DSCatalog.projections.ProductProjection;
 import org.springframework.data.domain.Page;

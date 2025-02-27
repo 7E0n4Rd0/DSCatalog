@@ -43,13 +43,6 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /*@Transactional(readOnly = true)
-    public Page<UserDTO> findAllWithRolesJPQL(Pageable pageable) {
-        Page<User> listUser = repository.searchUserWithRoles(pageable);
-        Page<UserDTO> page = new PageImpl<UserDTO>(listUser.stream().map(UserDTO::new).toList(), pageable, listUser.getSize());
-        return page;
-    }*/
-
     @Transactional(readOnly = true)
     public Page<UserDTO> findAllPaged(String roleId, Pageable pageable) {
         List<Long> roleIds = ("0".equals(roleId)) ? Arrays.asList() :
@@ -134,55 +127,4 @@ public class UserService implements UserDetailsService {
                                 roleRepository.findById(x.getId()).get().getAuthority()))
                         .collect(Collectors.toSet()));
     }
-
-
-    /*private Page<UserDTO> listUserProjectionToPageUser(Integer page, Integer size, String sort, String direction, Pageable pageable) {
-        List<UserProjection> result = repository.findAllUsersWithRolesPagedSQL(pageable);
-        Set<User> users = new HashSet<>();
-        User entity = null;
-        for (UserProjection projection : result) {
-            entity = new User();
-            copyProjectionToEntity(projection, entity);
-            if (!users.isEmpty()) {
-                if (users.contains(entity)) {
-                    int index = users.stream().toList().indexOf(entity);
-                    users.stream().toList().get(index)
-                            .addRoles(new Role(projection.getRoleId(), projection.getAuthority()));
-                }
-            }
-            users.add(entity);
-        }
-        System.out.println("Sort: "+ Sort.by(sort));
-        List<UserDTO> list = users.stream().sorted(getComparatorByName(Sort.by(sort))).map(UserDTO::new).toList();
-        //int start = Math.min((int) pageable.getOffset(), list.size());
-        //int end = Math.min((start + pageable.getPageSize()), list.size());
-        System.out.println(pageable.getPageNumber() +" "+ pageable.getPageSize() + " " + pageable.getSort().toString());
-        configurePage(sort, direction, list);
-        Page<UserDTO> userDTOPage = new PageImpl<UserDTO>(list);
-        return userDTOPage;
-    }
-
-    private void configurePage(String sort, String direction, List<UserDTO> list) {
-        MutableSortDefinition mutableSortDefinition = new MutableSortDefinition();
-        mutableSortDefinition.setProperty(sort);
-        PagedListHolder<UserDTO> pagedListHolder = new PagedListHolder<>(list);
-        pagedListHolder.setSort(mutableSortDefinition);
-        mutableSortDefinition.setAscending(false);
-    }
-
-    private Comparator<User> getComparatorByName(Sort sort) {
-        Comparator<User> firstName = Comparator.comparing(User::getFirstName);
-        Comparator<User> lastName = Comparator.comparing(User::getLastName);
-        Comparator<User> email = Comparator.comparing(User::getEmail);
-        Comparator<User> id = Comparator.comparing(User::getId);
-
-        List<Comparator<User>> comparatorList = new ArrayList<>(
-                List.of(firstName, lastName, email, id));
-        for (Comparator<User> comparator : comparatorList) {
-            if (comparator.toString().equals(sort.toString())) {
-                return comparator;
-            }
-        }
-        return firstName;
-    }*/
 }
