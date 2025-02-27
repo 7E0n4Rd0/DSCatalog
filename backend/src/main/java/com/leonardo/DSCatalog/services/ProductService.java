@@ -41,7 +41,7 @@ public class ProductService {
         Page<ProductProjection> page = repository.searchProducts(categoryIds, name, pageable);
         List<Long> productIds = page.map(ProductProjection::getId).toList();
         List<Product> entities = repository.searchProductsWithCategories(productIds);
-        entities = Utils.replace(page.getContent(), entities);
+        entities = (List<Product>) Utils.replace(page.getContent(), entities);
 
         List<ProductDTO> dtos = entities.stream().map(ProductDTO::new).toList();
         Page<ProductDTO> pageDto = new PageImpl<>(dtos, page.getPageable(), page.getTotalElements());
