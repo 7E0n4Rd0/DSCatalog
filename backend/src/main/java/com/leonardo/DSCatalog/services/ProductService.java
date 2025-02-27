@@ -9,6 +9,7 @@ import com.leonardo.DSCatalog.repositories.CategoryRepository;
 import com.leonardo.DSCatalog.repositories.ProductRepository;
 import com.leonardo.DSCatalog.services.exceptions.DatabaseException;
 import com.leonardo.DSCatalog.services.exceptions.ResourceNotFoundException;
+import com.leonardo.DSCatalog.util.Utils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -40,6 +41,8 @@ public class ProductService {
         Page<ProductProjection> page = repository.searchProducts(categoryIds, name, pageable);
         List<Long> productIds = page.map(ProductProjection::getId).toList();
         List<Product> entities = repository.searchProductsWithCategories(productIds);
+        entities = Utils.replace(page.getContent(), entities);
+
         List<ProductDTO> dtos = entities.stream().map(ProductDTO::new).toList();
         Page<ProductDTO> pageDto = new PageImpl<>(dtos, page.getPageable(), page.getTotalElements());
         return pageDto;
