@@ -1,5 +1,6 @@
 package com.leonardo.DSCatalog.entities;
 
+import com.leonardo.DSCatalog.projections.IdProjection;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,7 +10,7 @@ import java.util.*;
 
 @Entity
 @Table(name = "tb_user")
-public class User implements UserDetails {
+public class User implements UserDetails, IdProjection<Long> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,6 +37,7 @@ public class User implements UserDetails {
         this.password = password;
     }
 
+    @Override
     public Long getId() {
         return id;
     }

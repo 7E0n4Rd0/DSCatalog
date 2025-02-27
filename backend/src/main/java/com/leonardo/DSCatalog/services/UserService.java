@@ -12,7 +12,9 @@ import com.leonardo.DSCatalog.repositories.RoleRepository;
 import com.leonardo.DSCatalog.repositories.UserRepository;
 import com.leonardo.DSCatalog.services.exceptions.DatabaseException;
 import com.leonardo.DSCatalog.services.exceptions.ResourceNotFoundException;
+import com.leonardo.DSCatalog.util.Utils;
 import jakarta.persistence.EntityNotFoundException;
+import jdk.jshell.execution.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PagedListHolder;
@@ -41,18 +43,24 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Transactional(readOnly = true)
+    /*@Transactional(readOnly = true)
     public Page<UserDTO> findAllWithRolesJPQL(Pageable pageable) {
-        Page<User> listUser = repository.findAllUserWithRolesPagedJPQL(pageable);
+        Page<User> listUser = repository.searchUserWithRoles(pageable);
         Page<UserDTO> page = new PageImpl<UserDTO>(listUser.stream().map(UserDTO::new).toList(), pageable, listUser.getSize());
         return page;
-    }
-
-    /*@Transactional(readOnly = true)
-    public Page<UserDTO> findAllWithRolesSQL(Integer page, Integer size, String sort, String direction, Pageable pageable) {
-        Page<UserDTO> pageDto = listUserProjectionToPageUser(page, size, sort, direction, pageable);
-        return pageDto;
     }*/
+
+    @Transactional(readOnly = true)
+    public Page<UserDTO> findAllPaged(String roleId, Pageable pageable) {
+        List<Long> roleIds = ("0".equals(roleId)) ? Arrays.asList() :
+                Arrays.stream(roleId.split(",")).map(Long::parseLong).toList();
+        Page<UserProjection> page = repository.searchUsers(roleIds, pageable);
+        List<Long> userIds = page.map(UserProjection::getId).toList();
+        List<User> entities = repository.searchUserWithRoles(userIds);
+        entities = (List<User>) Utils.replace(page.getContent(), entities);
+        List<UserDTO> dtos = entities.stream().map(UserDTO::new).toList();
+        return new PageImpl<>(dtos, page.getPageable(), page.getTotalElements());
+    }
 
     @Transactional(readOnly = true)
     public UserDTO findById(Long id) {
@@ -125,15 +133,6 @@ public class UserService implements UserDetailsService {
                                 roleRepository.findById(x.getId()).get().getId(),
                                 roleRepository.findById(x.getId()).get().getAuthority()))
                         .collect(Collectors.toSet()));
-    }
-
-    private void copyProjectionToEntity(UserProjection projection, User entity) {
-        entity.setId(projection.getId());
-        entity.setFirstName(projection.getFirstName());
-        entity.setLastName(projection.getLastName());
-        entity.setEmail(projection.getEmail());
-
-        entity.addRoles(new Role(projection.getRoleId(), projection.getAuthority()));
     }
 
 

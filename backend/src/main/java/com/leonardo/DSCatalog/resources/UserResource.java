@@ -24,8 +24,10 @@ public class UserResource {
     private UserService service;
 
     @GetMapping
-    public ResponseEntity<Page<UserDTO>> findAllWithRolesPaged(Pageable pageable){
-        Page<UserDTO> userDTOPage = service.findAllWithRolesJPQL(pageable);
+    public ResponseEntity<Page<UserDTO>> findAllWithRolesPaged(
+            @RequestParam(name = "roleId", defaultValue = "0") String roleId,
+            Pageable pageable){
+        Page<UserDTO> userDTOPage = service.findAllPaged(roleId, pageable);
         return ResponseEntity.ok().body(userDTOPage);
     }
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")

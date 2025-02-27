@@ -1,11 +1,8 @@
 package com.leonardo.DSCatalog.projections;
 
-public interface UserProjection {
-
-    Long getId();
+public interface UserProjection extends IdProjection<Long>{
     String getFirstName();
     String getLastName();
     String getEmail();
-    Long getRoleId();
-    String getAuthority();
+
 }
