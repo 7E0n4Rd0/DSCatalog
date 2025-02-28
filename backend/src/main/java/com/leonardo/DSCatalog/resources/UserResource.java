@@ -23,6 +23,7 @@ public class UserResource {
     @Autowired
     private UserService service;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<Page<UserDTO>> findAllWithRolesPaged(
             @RequestParam(name = "roleId", defaultValue = "0") String roleId,
@@ -36,7 +37,6 @@ public class UserResource {
         return ResponseEntity.ok().body(service.findById(id));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<UserDTO> insert(@Valid @RequestBody UserInsertDTO insertDTO){
         UserDTO dto = service.insert(insertDTO);
