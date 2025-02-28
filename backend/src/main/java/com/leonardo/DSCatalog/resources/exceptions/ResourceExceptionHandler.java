@@ -1,6 +1,7 @@
 package com.leonardo.DSCatalog.resources.exceptions;
 
 import com.leonardo.DSCatalog.services.exceptions.DatabaseException;
+import com.leonardo.DSCatalog.services.exceptions.EmailException;
 import com.leonardo.DSCatalog.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,13 @@ public class ResourceExceptionHandler {
                 "Invalid Data", e.getMessage(), request.getRequestURI());
         e.getBindingResult().getFieldErrors()
                 .forEach(x -> err.addError(x.getField(), x.getDefaultMessage()));
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
+    }
+
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<StandardError> emailException(EmailException e, HttpServletRequest request){
+        ValidationError err = new ValidationError(Instant.now(), HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Failed to send Email", e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(err);
     }
 
