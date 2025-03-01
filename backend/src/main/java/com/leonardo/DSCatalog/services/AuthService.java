@@ -1,17 +1,21 @@
 package com.leonardo.DSCatalog.services;
 
 import com.leonardo.DSCatalog.DTO.EmailDTO;
+import com.leonardo.DSCatalog.DTO.NewPasswordDTO;
 import com.leonardo.DSCatalog.entities.PasswordRecover;
 import com.leonardo.DSCatalog.entities.User;
 import com.leonardo.DSCatalog.repositories.PasswordRecoverRepository;
 import com.leonardo.DSCatalog.repositories.UserRepository;
 import com.leonardo.DSCatalog.services.exceptions.ResourceNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +27,9 @@ public class AuthService {
 
     @Value("${email.password-recover.uri}")
     private String recoverUri;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private EmailService emailService;
@@ -52,5 +59,17 @@ public class AuthService {
         entity = passwordRecoverRepository.save(entity);
 
         emailService.sendMail(body.getEmail(), "Password Recover", text);
+    }
+
+    @Transactional
+    public void saveNewPassword(NewPasswordDTO dto) {
+        List<PasswordRecover> result = passwordRecoverRepository.searchValidTokens(dto.getToken(), Instant.now());
+        if (result.isEmpty()){
+            throw new ResourceNotFoundException("Invalid Token");
+        }
+
+        User user = userRepository.findByEmail(result.getFirst().getEmail()).get();
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user = userRepository.save(user);
     }
 }
