@@ -59,5 +59,9 @@ public class UserResource {
         return ResponseEntity.noContent().build();
     }
 
-
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @GetMapping(value = "/me")
+    public ResponseEntity<UserDTO> findMe(){
+        return ResponseEntity.ok().body(service.findMe());
+    }
 }
