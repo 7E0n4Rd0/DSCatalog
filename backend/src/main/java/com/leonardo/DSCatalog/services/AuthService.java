@@ -7,7 +7,6 @@ import com.leonardo.DSCatalog.entities.User;
 import com.leonardo.DSCatalog.repositories.PasswordRecoverRepository;
 import com.leonardo.DSCatalog.repositories.UserRepository;
 import com.leonardo.DSCatalog.services.exceptions.ResourceNotFoundException;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -47,14 +46,14 @@ public class AuthService {
 
     @Transactional
     public void createRecoverToken(EmailDTO body) {
-        String token = UUID.randomUUID().toString();
-        String text = "Enter on the link to create a new password\n\n" + recoverUri + token + "\n" +
-                "Validade de " + tokenMinutes + "minutos.";
         Optional<User> user = userRepository.findByEmail(body.getEmail());
-
         if (user.isEmpty()){
             throw new ResourceNotFoundException("Email not found");
         }
+
+        String token = UUID.randomUUID().toString();
+        String text = "Enter on the link to create a new password\n\n" + recoverUri + token + "\n" +
+                "Validade de " + tokenMinutes + "minutos.";
 
         PasswordRecover entity = new PasswordRecover();
         entity.setEmail(body.getEmail());
