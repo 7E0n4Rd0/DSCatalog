@@ -9,7 +9,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
-public class MailService {
+public class EmailService {
 
     @Value("${spring.mail.username}")
     private String emailFrom;
@@ -17,7 +17,7 @@ public class MailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    private void sendMail(String to, String subject, String body){
+    public void sendMail(String to, String subject, String body){
         try{
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(emailFrom);
